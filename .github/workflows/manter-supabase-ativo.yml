@@ -1,0 +1,19 @@
+# Evita que o plano gratuito do Supabase pause o projeto por falta de uso.
+# Faz uma consulta de teste (sem dados) 2 vezes por semana, usando a URL e a chave do config.js.
+name: Manter Supabase ativo
+on:
+  schedule:
+    - cron: '17 9 * * 1,4'
+  workflow_dispatch:
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Consulta de teste
+        run: |
+          URL=$(grep -oP "SUPABASE_URL:\s*'\K[^']+" config.js)
+          CHAVE=$(grep -oP "SUPABASE_CHAVE:\s*'\K[^']+" config.js)
+          curl -fsS -X POST "$URL/rest/v1/rpc/consultar_pid" \
+            -H "apikey: $CHAVE" -H "Content-Type: application/json" \
+            -d '{"p_pid":"PID-000-000-000/00"}'
