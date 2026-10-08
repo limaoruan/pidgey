@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://limaoruan.github.io/pidgey/sitemap.xml
