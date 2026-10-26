@@ -28,6 +28,37 @@ O cliente digita o código PID do botton e vê: PID, produto, arte, marca, frent
 
 **Mensagens:** "Formato inválido. Use PID-000-000-000/00.", "PID não encontrado.", "Não foi possível consultar agora. Tente novamente." e "Sem conexão. Tente novamente.". O site abre sem internet, mas a consulta exige conexão.
 
+## Instalação
+
+### 1. Banco de dados
+O PIDgey usa o **mesmo projeto do Supabase** do PokéPOS. A ordem importa:
+1. Se ainda não fez, instale o PokéPOS primeiro (projeto no Supabase e o `setup_supabase.sql` dele): ele cria as tabelas.
+2. Depois, no **SQL Editor**, cole todo o `setup_supabase.sql` desta pasta e execute **uma única vez**. Ele cria só a função `consultar_pid`, que lê a tabela `bottons`, e libera o público para chamá-la.
+
+Se o setup do PokéPOS não tiver sido executado, este para com um aviso.
+
+### 2. Configurar o site
+- Em `config.js`, troque `SUPABASE_URL` e `SUPABASE_CHAVE` pela Project URL e pela chave **publishable** (ou **anon**) do mesmo projeto, em **Project Settings**, **API Keys**.
+- Essa chave pode ficar no repositório público: quem protege os dados é o banco. **Nunca** use a chave `secret` ou `service_role`.
+- Se for publicar em outra conta do GitHub, troque `limaoruan` pelo seu usuário em `index.html`, `robots.txt`, `sitemap.xml` e `LICENCE.md`.
+
+### 3. Publicar no GitHub Pages
+1. Crie um repositório **público** chamado `pidgey`.
+2. Envie todo o conteúdo desta pasta para a raiz do repositório, inclusive a pasta `.github`. O arquivo `.nojekyll` é opcional.
+3. Em **Settings**, **Pages**, escolha **Deploy from a branch**, branch `main`, pasta `/ (root)`.
+4. Aguarde alguns minutos. O endereço será https://limaoruan.github.io/pidgey/
+
+Se o seu aparelho ocultar ou não enviar a pasta `.github`, crie o workflow direto no GitHub: **Add file**, **Create new file**, nome `.github/workflows/manter-supabase-ativo.yml`, e cole o conteúdo do arquivo desta pasta.
+
+### 4. Testar
+1. Abra o endereço e digite o PID de um botton já entregue; deve aparecer "Botton encontrado".
+2. Em **Actions**, escolha **Manter Supabase ativo** e use **Run workflow**. Resultado verde confirma que o Supabase respondeu.
+
+### 5. Instalar como app (opcional)
+Os sites são PWA. No celular, abra o endereço do site e use **Adicionar à tela inicial**:
+- **Android:** menu do navegador, **Instalar app** ou **Adicionar à tela inicial**.
+- **iPhone:** botão **Compartilhar**, **Adicionar à Tela de Início**.
+
 ## Manutenção
 O plano gratuito do Supabase pausa o projeto após cerca de 7 dias sem uso. O arquivo `.github/workflows/manter-supabase-ativo.yml` faz uma consulta pública de teste (`consultar_pid`, sem dados) 2 vezes por semana, às segundas e quintas, 00:00 no horário de Brasília, usando a URL e a chave do `config.js`. Para testar na hora, abra **Actions**, escolha **Manter Supabase ativo** e use **Run workflow**; o resultado verde confirma que o Supabase respondeu.
 - Se o GitHub desativar o agendamento por falta de atividade no repositório, reative em **Actions**.
