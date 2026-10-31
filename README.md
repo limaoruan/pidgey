@@ -1,4 +1,4 @@
-# PIDgey 1.3
+# PIDgey 1.4
 
 Site **público** da PokéBottons para consulta do código PID do botton. Site estático (PWA, mobile first) feito por Ruan Oliveira Lima, hospedado no **GitHub Pages**, com consulta ao banco no **Supabase**.
 
@@ -44,15 +44,13 @@ Se o setup do PokéPOS não tiver sido executado, este para com um aviso.
 
 ### 3. Publicar no GitHub Pages
 1. Crie um repositório **público** chamado `pidgey`.
-2. Envie todo o conteúdo desta pasta para a raiz do repositório, inclusive a pasta `.github`. O arquivo `.nojekyll` é opcional.
+2. Envie todo o conteúdo desta pasta para a raiz do repositório, O arquivo `.nojekyll` é opcional.
 3. Em **Settings**, **Pages**, escolha **Deploy from a branch**, branch `main`, pasta `/ (root)`.
 4. Aguarde alguns minutos. O endereço será https://limaoruan.github.io/pidgey/
 
-Se o seu aparelho ocultar ou não enviar a pasta `.github`, crie o workflow direto no GitHub: **Add file**, **Create new file**, nome `.github/workflows/manter-supabase-ativo.yml`, e cole o conteúdo do arquivo desta pasta.
-
 ### 4. Testar
 1. Abra o endereço e digite o PID de um botton já entregue; deve aparecer "Botton encontrado".
-2. Em **Actions**, escolha **Manter Supabase ativo** e use **Run workflow**. Resultado verde confirma que o Supabase respondeu.
+2. Se ainda não configurou, crie a tarefa do cron-job.org descrita em **Manutenção**.
 
 ### 5. Instalar como app (opcional)
 Os sites são PWA. No celular, abra o endereço do site e use **Adicionar à tela inicial**:
@@ -60,8 +58,8 @@ Os sites são PWA. No celular, abra o endereço do site e use **Adicionar à tel
 - **iPhone:** botão **Compartilhar**, **Adicionar à Tela de Início**.
 
 ## Manutenção
-O plano gratuito do Supabase pausa o projeto após cerca de 7 dias sem uso. O arquivo `.github/workflows/manter-supabase-ativo.yml` faz uma consulta pública de teste (`consultar_pid`, sem dados) 2 vezes por semana, às segundas e quintas, 00:00 no horário de Brasília, usando a URL e a chave do `config.js`. Para testar na hora, abra **Actions**, escolha **Manter Supabase ativo** e use **Run workflow**; o resultado verde confirma que o Supabase respondeu.
-- Se o GitHub desativar o agendamento por falta de atividade no repositório, reative em **Actions**.
+O plano gratuito do Supabase pausa o projeto após cerca de 7 dias sem uso. Para evitar isso, uma tarefa agendada no **cron-job.org** (gratuito) faz uma consulta mínima a cada 2 ou 3 dias, usando a função `ping`, criada pelo `setup_supabase.sql` do PokéPOS (que deve ser rodado antes do deste projeto).
+- O PokéPOS e o PIDgey usam o mesmo projeto do Supabase, então a tarefa descrita no README do PokéPOS, seção **Manutenção**, serve para os dois. Não precisa criar outra.
 - Se o projeto pausar, use **Restore** no painel do Supabase.
 - Para atualizar o site, edite os arquivos no repositório; o GitHub Pages publica sozinho em alguns minutos.
 
@@ -69,7 +67,6 @@ O plano gratuito do Supabase pausa o projeto após cerca de 7 dias sem uso. O ar
 - `index.html`: o site inteiro (HTML, CSS e JavaScript)
 - `config.js`: URL e chave publishable do Supabase
 - `setup_supabase.sql`: cria a consulta pública `consultar_pid` (rode depois do setup do PokéPOS)
-- `.github/workflows/manter-supabase-ativo.yml`: consulta agendada
 - `service-worker.js`, `manifest.webmanifest`: PWA
 - `logo.png`, `icon-*.png`, `favicon*`, `apple-touch-icon.png`, `og-image.jpg`: imagens
 - `LICENCE.md`: licença do projeto

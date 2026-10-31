@@ -15,9 +15,9 @@
 <meta name="license" content="CC BY-SA 4.0 — Creative Commons Atribuição-CompartilhaIgual 4.0 Internacional">
 <meta name="generator" content="PIDgey">
 <meta name="application-name" content="PIDgey">
-<meta name="version" content="1.3">
+<meta name="version" content="1.4">
 <meta name="date" content="2026-10-06">
-<meta name="revised" content="2026-10-25T19:40:00-03:00">
+<meta name="revised" content="2026-10-31T11:46:00-03:00">
 <meta name="category" content="UtilitiesApplication">
 <meta name="subject" content="Consulta pública de PID de bottons">
 <meta name="language" content="pt-BR">
@@ -100,10 +100,10 @@
       "description": "Consulte o código PID do seu botton PokéBottons e veja os dados do produto: lote, item, medidas, data de fabricação e data de entrega.",
       "applicationCategory": "UtilitiesApplication",
       "operatingSystem": "Web",
-      "softwareVersion": "1.3",
+      "softwareVersion": "1.4",
       "inLanguage": "pt-BR",
       "dateCreated": "2026-10-06",
-      "dateModified": "2026-10-25T19:40:00-03:00",
+      "dateModified": "2026-10-31T11:46:00-03:00",
       "isAccessibleForFree": true,
       "browserRequirements": "Requer um navegador moderno com JavaScript",
       "keywords": [
@@ -192,7 +192,7 @@ footer{text-align:left;color:var(--m);font-size:.7rem;line-height:1.35;padding:.
 </main>
 <footer aria-label="Informações do site">
   <b>PIDgey</b><br>Consulta pública do código PID dos bottons da PokéBottons.<br>
-  Versão: 1.3 · Lançamento 2026 · © 2026 Ruan Oliveira Lima · <span class="nw"><a href="https://www.instagram.com/ruanoliveiralima_/" target="_blank" rel="me noopener">Instagram do autor</a></span> · <span class="nw">Licença: <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.pt-br" target="_blank" rel="noopener license">CC BY-SA 4.0</a></span>
+  Versão: 1.4 · Lançamento 2026 · © 2026 Ruan Oliveira Lima · <span class="nw"><a href="https://www.instagram.com/ruanoliveiralima_/" target="_blank" rel="me noopener">Instagram do autor</a></span> · <span class="nw">Licença: <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.pt-br" target="_blank" rel="noopener license">CC BY-SA 4.0</a></span>
 </footer>
 <script src="config.js"></script>
 <script>
@@ -239,7 +239,7 @@ async function buscar(v){
     const R=await consultar(v),d=R.d;
     if(my!==seq)return;
     if(R.status!==200){document.body.classList.add('bad');out.innerHTML='<p class="erro">'+esc(d.erro||'Erro')+(R.status===404?'<br><small style="color:var(--m);font-weight:400">Se o botton foi entregue há pouco, aguarde até 24 horas.</small>':'')+'</p>';return}
-    const L=[['PID',d.pid],['Produto','Broche Personalizado'],['Arte',d.arte||'—'],['Marca','PokéBottons'],['Frente','Metal'],['Traseira','Plástico Branco'],['Fixação','Alfinete'],['Diâmetro','37mm'],['Espessura','6mm'],['Peso','4g'],['Lote',Number(d.lote).toLocaleString('pt-BR')],['Item',d.item],['Feito em',d.fabricado_em],['Entregue em',d.entregue_em]];
+    const L=[['PID',d.pid],['Produto','Broche Personalizado'],['Arte',d.arte||''],['Marca','PokéBottons'],['Frente','Metal'],['Traseira','Plástico Branco'],['Fixação','Alfinete'],['Diâmetro','37mm'],['Espessura','6mm'],['Peso','4g'],['Lote',Number(d.lote).toLocaleString('pt-BR')],['Item',d.item],['Feito em',d.fabricado_em],['Entregue em',d.entregue_em]];
     out.innerHTML='<p class="ok">✔ Botton encontrado</p><div class="card"><dl>'+L.map(x=>'<div class="l"><dt>'+x[0]+'</dt><dd>'+esc(x[1])+'</dd></div>').join('')+'</dl></div><button type="button" class="copiar" id="cp">Copiar dados</button>';
     $('#cp').onclick=()=>copiar(L.map(x=>x[0]+': '+x[1]).join('\n'),$('#cp'));document.body.classList.add('res');
   }catch(e){if(my!==seq)return;document.body.classList.add('bad');out.innerHTML='<p class="erro">Sem conexão. Tente novamente.</p>'}
