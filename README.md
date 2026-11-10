@@ -50,7 +50,7 @@ Se o setup do PokéPOS não tiver sido executado, este para com um aviso.
 
 ### 4. Testar
 1. Abra o endereço e digite o PID de um botton já entregue; deve aparecer "Botton encontrado".
-2. Se ainda não configurou, crie a tarefa do cron-job.org descrita em **Manutenção**.
+2. Se ainda não configurou, crie o monitor do Checkly descrito em **Manutenção** e rode o **Run test**.
 
 ### 5. Instalar como app (opcional)
 Os sites são PWA. No celular, abra o endereço do site e use **Adicionar à tela inicial**:
@@ -58,15 +58,46 @@ Os sites são PWA. No celular, abra o endereço do site e use **Adicionar à tel
 - **iPhone:** botão **Compartilhar**, **Adicionar à Tela de Início**.
 
 ## Manutenção
-O plano gratuito do Supabase pausa o projeto após cerca de 7 dias com pouca atividade no banco de dados. Para evitar isso, uma tarefa agendada no **cron-job.org** (gratuito) consulta o PID de teste `PID-000-000-000/00` (função `consultar_pid`, criada pelo `setup_supabase.sql` deste projeto) várias vezes ao dia. O Supabase pede "algumas requisições por dia" ao banco. Configure uma vez:
-1. Rode antes o `setup_supabase.sql` deste projeto, se ainda não rodou (ele cria a `consultar_pid`).
-2. Crie uma conta em https://cron-job.org e, em **Cronjobs**, clique em **Create cronjob**.
-3. **URL:** `SUA_URL_DO_SUPABASE/rest/v1/rpc/consultar_pid` (a URL é a `SUPABASE_URL` do `config.js`).
-4. **Agendamento:** a cada 4 horas.
-5. Em **Advanced**: método de requisição `POST`; cabeçalhos `apikey: SUA_CHAVE_PUBLISHABLE`, `Authorization: Bearer SUA_CHAVE_PUBLISHABLE` e `Content-Type: application/json`; corpo `{"p_pid":"PID-000-000-000/00"}`. A chave é a `SUPABASE_CHAVE` do `config.js` (a publishable, nunca a secret).
-6. Salve e use **Test run**: o esperado é status 200. A resposta pode ser `null` se esse botton ainda não foi entregue, e isso não é erro.
-- Se o projeto pausar mesmo assim, abra-o no painel do Supabase e clique em **Resume project** (o aviso por e-mail chega cerca de 1 semana antes). Depois confira o **History** da tarefa no cron-job.org.
-- O PokéPOS e o PIDgey usam o mesmo projeto do Supabase, então esta única tarefa serve para os dois.
+O plano gratuito do Supabase pausa o projeto após cerca de 7 dias com pouca atividade no banco de dados. Para evitar isso, um monitor gratuito no **Checkly** abre o PIDgey num navegador de verdade a cada 6 horas. Como o site faz a busca sozinha quando a URL tem `?pid=`, essa abertura consulta o banco (função `consultar_pid`) e conta como atividade. Configure uma vez:
+1. Rode antes o `setup_supabase.sql` deste projeto, se ainda não rodou (ele cria a `consultar_pid`), e confirme que o site está publicado no GitHub Pages.
+2. Crie uma conta gratuita (plano **Hobby**) em https://app.checklyhq.com/signup e crie um **Browser Check**.
+3. Cole este script no check (troque `limaoruan.github.io/pidgey` pelo endereço do seu site, se for outro):
+
+```js
+import { test, expect } from '@playwright/test'
+
+test('PIDgey consulta o Supabase', async ({ page }) => {
+  const resposta = page.waitForResponse(r =>
+    r.url().includes('/rest/v1/rpc/consultar_pid'))
+  await page.goto('https://limaoruan.github.io/pidgey/?pid=PID-000-000-000/00')
+  const r = await resposta
+  expect(r.status()).toBe(200)
+
+  const dados = await r.json()
+  if (dados) {
+    console.log('Botton encontrado')
+    console.log('PID: ' + dados.pid)
+    console.log('Lote: ' + dados.lote + ' | Item: ' + dados.item)
+    console.log('Arte: ' + (dados.arte || ''))
+    console.log('Fabricado em: ' + dados.fabricado_em)
+    console.log('Entregue em: ' + dados.entregue_em)
+  } else {
+    console.log('Nenhum botton entregue com esse PID (resposta null).')
+  }
+
+  await page.waitForTimeout(1000)
+  console.log('Resultado na tela do site: ' + (await page.locator('#out').innerText()))
+})
+```
+
+4. Configure o check:
+   - **Frequência:** a cada 6 horas.
+   - **Localizações:** pode deixar uma ou mais, mas use **Round-robin** e deixe **Parallel runs** desligado. Assim roda em uma localização por vez, cerca de 120 execuções por mês, dentro das 1.000 gratuitas.
+   - **Alertas:** ligue o e-mail com o seu endereço, para ser avisado se o check falhar.
+5. Use **Run test** (o esperado é passar, em verde), clique em **Save** e confirme que o check está **ativado** e não silenciado (muted). O **Run test** sozinho não liga o agendamento.
+6. Confira depois de 6 a 12 horas: o histórico do check deve mostrar execuções agendadas, a cada 6 horas, todas verdes. O log de cada execução mostra os dados do botton consultado; se o botton `000-000-000/00` ainda não foi entregue, o log diz "resposta null", e isso não é erro.
+- Se o check falhar, o projeto provavelmente pausou: abra-o no painel do Supabase e clique em **Resume project** (o aviso por e-mail do Supabase chega cerca de 1 semana antes). Se aparecer erro de DNS, o endereço do Supabase ainda não voltou; espere alguns minutos.
+- O PokéPOS e o PIDgey usam o mesmo projeto do Supabase, então este único monitor serve para os dois.
 - Para atualizar o site, edite os arquivos no repositório; o GitHub Pages publica sozinho em alguns minutos.
 
 ## Arquivos
@@ -84,5 +115,5 @@ O plano gratuito do Supabase pausa o projeto após cerca de 7 dias com pouca ati
 
 ---
 
-© 2026 Ruan Oliveira Lima · Instagram: https://www.instagram.com/ruanoliveiralima_/
+© 2026 Ruan Oliveira Lima · Instagram: https://www.instagram.com/limaoruan/
 Licença: CC BY-SA 4.0 (texto completo no `LICENCE.md`)
