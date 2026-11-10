@@ -58,9 +58,15 @@ Os sites são PWA. No celular, abra o endereço do site e use **Adicionar à tel
 - **iPhone:** botão **Compartilhar**, **Adicionar à Tela de Início**.
 
 ## Manutenção
-O plano gratuito do Supabase pausa o projeto após cerca de 7 dias sem uso. Para evitar isso, uma tarefa agendada no **cron-job.org** (gratuito) faz uma consulta mínima a cada 2 ou 3 dias, usando a função `ping`, criada pelo `setup_supabase.sql` do PokéPOS (que deve ser rodado antes do deste projeto).
-- O PokéPOS e o PIDgey usam o mesmo projeto do Supabase, então a tarefa descrita no README do PokéPOS, seção **Manutenção**, serve para os dois. Não precisa criar outra.
-- Se o projeto pausar, use **Restore** no painel do Supabase.
+O plano gratuito do Supabase pausa o projeto após cerca de 7 dias com pouca atividade no banco de dados. Para evitar isso, uma tarefa agendada no **cron-job.org** (gratuito) consulta o PID de teste `PID-000-000-000/00` (função `consultar_pid`, criada pelo `setup_supabase.sql` deste projeto) várias vezes ao dia. O Supabase pede "algumas requisições por dia" ao banco. Configure uma vez:
+1. Rode antes o `setup_supabase.sql` deste projeto, se ainda não rodou (ele cria a `consultar_pid`).
+2. Crie uma conta em https://cron-job.org e, em **Cronjobs**, clique em **Create cronjob**.
+3. **URL:** `SUA_URL_DO_SUPABASE/rest/v1/rpc/consultar_pid` (a URL é a `SUPABASE_URL` do `config.js`).
+4. **Agendamento:** a cada 4 horas.
+5. Em **Advanced**: método de requisição `POST`; cabeçalhos `apikey: SUA_CHAVE_PUBLISHABLE`, `Authorization: Bearer SUA_CHAVE_PUBLISHABLE` e `Content-Type: application/json`; corpo `{"p_pid":"PID-000-000-000/00"}`. A chave é a `SUPABASE_CHAVE` do `config.js` (a publishable, nunca a secret).
+6. Salve e use **Test run**: o esperado é status 200. A resposta pode ser `null` se esse botton ainda não foi entregue, e isso não é erro.
+- Se o projeto pausar mesmo assim, abra-o no painel do Supabase e clique em **Resume project** (o aviso por e-mail chega cerca de 1 semana antes). Depois confira o **History** da tarefa no cron-job.org.
+- O PokéPOS e o PIDgey usam o mesmo projeto do Supabase, então esta única tarefa serve para os dois.
 - Para atualizar o site, edite os arquivos no repositório; o GitHub Pages publica sozinho em alguns minutos.
 
 ## Arquivos
